@@ -2,8 +2,9 @@ package br.com.romulo.algamoneyapi.controller;
 
 import java.util.Arrays;
 import java.util.List;
-import javax.validation.Valid;
+
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -19,18 +20,18 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-
 import br.com.romulo.algamoneyapi.event.RecursoCriandoEvento;
 import br.com.romulo.algamoneyapi.exceptiohandler.AlgamoneyExceptionHandler.Erro;
 import br.com.romulo.algamoneyapi.model.Lancamento;
+import br.com.romulo.algamoneyapi.repository.LancamentoRepository;
 import br.com.romulo.algamoneyapi.repository.filter.LancamentoFilter;
 import br.com.romulo.algamoneyapi.repository.projecao.ResumoLancamento;
-import br.com.romulo.algamoneyapi.repository.LancamentoRepository;
 import br.com.romulo.algamoneyapi.service.LancamentoService;
 import br.com.romulo.algamoneyapi.service.exception.PessoaInexisistenteOuInativaException;
 
@@ -83,9 +84,21 @@ public class LancamentoController {
 		return lancamentoRepository.filtrar(lacamentoFilter,pageable);
 	}
 	
+	@PutMapping("/{cod}")
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO')")
+	public ResponseEntity<Lancamento> atualizar(@PathVariable Long cod, @Valid @RequestBody Lancamento lancamento){
+		
+		try {
+				Lancamento lancSalvo = lancamentoService.atualizar(cod, lancamento);
+				return ResponseEntity.ok(lancSalvo);
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.notFound().build();
+		}
+	}
+	
 	
 	@GetMapping(params="resumo")
-	public Page<ResumoLancamento> remuir(LancamentoFilter lacamentoFilter, Pageable pageable ){
+	public Page<ResumoLancamento> resumir(LancamentoFilter lacamentoFilter, Pageable pageable ){
 		return lancamentoRepository.resumo(lacamentoFilter,pageable);
 	}
 	
