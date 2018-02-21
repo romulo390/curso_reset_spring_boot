@@ -33,7 +33,7 @@ import br.com.romulo.algamoneyapi.repository.LancamentoRepository;
 import br.com.romulo.algamoneyapi.repository.filter.LancamentoFilter;
 import br.com.romulo.algamoneyapi.repository.projecao.ResumoLancamento;
 import br.com.romulo.algamoneyapi.service.LancamentoService;
-import br.com.romulo.algamoneyapi.service.exception.PessoaInexisistenteOuInativaException;
+import br.com.romulo.algamoneyapi.service.exception.PessoaInexistenteOuInativaException;
 
 
 @RestController
@@ -57,7 +57,7 @@ public class LancamentoController {
 	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO') and #oauth2.hasScope('write')")
 	public ResponseEntity<Lancamento>criarLancamento(@Valid @RequestBody Lancamento lancamento, HttpServletResponse response ){
 
-		Lancamento salvaLancamento  = lancamentoService.salva(lancamento);				
+		Lancamento salvaLancamento  = lancamentoService.salvar(lancamento);				
 		publicador.publishEvent(new RecursoCriandoEvento(this, response, salvaLancamento.getCod()));
 	/**	
 		try {
@@ -91,6 +91,7 @@ public class LancamentoController {
 		try {
 				Lancamento lancSalvo = lancamentoService.atualizar(cod, lancamento);
 				return ResponseEntity.ok(lancSalvo);
+		
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.notFound().build();
 		}
@@ -125,10 +126,10 @@ public class LancamentoController {
 	}
 	/*
 	 * Método responsável em lançar uma exceção, caso a pessoa (/cod) passada não foi encontrada ou
-	 * esteja como o tipo=false;
+	 * esteja como o tipo=false ao inserir um lancamento;
 	 */
-	@ExceptionHandler({PessoaInexisistenteOuInativaException.class})
-	private ResponseEntity<Object> handlerPessoaInexisistenteOuInativaException(PessoaInexisistenteOuInativaException pes){
+	@ExceptionHandler({PessoaInexistenteOuInativaException.class})
+	private ResponseEntity<Object> handlerPessoaInexisistenteOuInativaException(PessoaInexistenteOuInativaException pes){
 		
 		String messagemUsuario = messageSource.getMessage("pessoa.inexistente-ou-inativa",null, LocaleContextHolder.getLocale());
 		String messagemDesenvolvedor = pes.toString();
